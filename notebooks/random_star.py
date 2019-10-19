@@ -108,3 +108,6 @@ stars_df.describe().to_dict()
 - tilt
 
 df.describe().where(pd.notnull(df.describe()), None).to_json()
+
+[field for field in ['a', 'b', 'pl_hostname'] if field in df.columns]
+df[['asd']]

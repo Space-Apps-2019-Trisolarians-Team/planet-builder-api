@@ -30,8 +30,12 @@ def get_star_stats():
     return stats.to_dict()
 
 
-def get_planet_stats():
-    stats = df.describe()
+def get_planet_stats(fields):
+    if fields is not None:
+        fields = [field for field in fields if field in df.columns]
+        stats = df[fields].describe()
+    else:
+        stats = df.describe()
     stats = stats.where(pd.notnull(stats), None)
     return stats.to_dict()
 

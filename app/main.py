@@ -20,8 +20,11 @@ def stats_stars():
 
 
 @app.get("/stats/planets")
-def stats_planets():
-    return planetapi.get_planet_stats()
+def stats_planets(fields: str = None):
+    print(fields)
+    if fields:
+        fields = fields.split(',')
+    return planetapi.get_planet_stats(fields)
 
 
 @app.get("/random-star")
