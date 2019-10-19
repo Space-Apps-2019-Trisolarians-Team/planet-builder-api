@@ -1,9 +1,12 @@
 import pandas as pd
 import math
 
-df = pd.read_csv('app/exoplanets.csv')
 STAR_COLUMNS = ['st_spstr', 'st_age',
                 'st_mass', 'st_rad', 'st_teff', 'st_lum']
+PLANET_COLUMNS = ['pl_rade', 'pl_hostname', '']
+
+df = pd.read_csv('app/exoplanets.csv')
+stars_df = df.groupby('pl_hostname').first()[STAR_COLUMNS]
 SUN_RADIUS = 695510  # km
 EFFECTIVE_TEMP_SUN = 5778
 
@@ -19,6 +22,18 @@ def get_star_info(star_name):
 
 def similar_planets():
     return 1
+
+
+def get_star_stats():
+    stats = stars_df.describe()
+    stats = stats.where(pd.notnull(stats), None)
+    return stats.to_dict()
+
+
+def get_planet_stats():
+    stats = df.describe()
+    stats = stats.where(pd.notnull(stats), None)
+    return stats.to_dict()
 
 
 def random_star():

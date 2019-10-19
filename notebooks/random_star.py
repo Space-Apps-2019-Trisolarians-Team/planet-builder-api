@@ -94,3 +94,17 @@ df['pl_hostname'].sample().values[0]
 star_columns = ['st_spstr', 'st_age', 'st_mass', 'st_rad', 'st_teff', 'st_lum']
 series = df[df['pl_hostname'] == df['pl_hostname'].sample().values[0]].iloc[0][star_columns]
 series.where(pd.notnull(series), None)
+
+
+
+df['pl_hostname'].nunique()
+
+stars_df = df.groupby('pl_hostname').first()[star_columns]
+stars_df
+stars_df.describe().to_dict()
+
+- distancia
+- radio
+- tilt
+
+df.describe().where(pd.notnull(df.describe()), None).to_json()
