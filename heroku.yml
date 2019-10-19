@@ -1,5 +1,6 @@
 build:
   docker:
     api: Dockerfile
+
 run:
-  web: /start.sh
+  api: /start.sh
