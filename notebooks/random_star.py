@@ -237,7 +237,8 @@ def planet_in_hz(planet):
 
 
 df.apply(planet_in_hz, axis=1)
-df['in_hz']
+df['in_hz'] = df.apply(planet_in_hz, axis=1)
+df.head()
 
 
 
