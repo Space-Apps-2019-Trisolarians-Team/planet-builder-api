@@ -80,7 +80,8 @@ def priority(row):
 # api
 
 def similar_planets(pl_rade, pl_orbsmax, prioritize, first=10):
-    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_orbsmax / NORMALIZATION_FACTORS['pl_orbsmax']])
+    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'],
+                       pl_orbsmax / NORMALIZATION_FACTORS['pl_orbsmax']])
     vectors = df[['pl_rade_norm', 'pl_orbsmax_norm']]
     distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
     if prioritize:
@@ -93,10 +94,6 @@ def similar_planets(pl_rade, pl_orbsmax, prioritize, first=10):
     top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
     return serialize(top_allinfo.head(first)).to_dict(orient='records')
-
-
-# def similar_planets_2(pl_rade, pl_orbsmax, prioritize, first=10):
-#     values = np.array([])
 
 
 def get_star_stats():
