@@ -89,11 +89,12 @@ column_description
 
 
 
-df['pl_hostname'].sample().values[0]
+df['pl_hostname'].unique().sample().values[0]
 
 star_columns = ['pl_hostname', 'st_spstr', 'st_age', 'st_mass', 'st_rad', 'st_teff', 'st_lum']
 series = df[df['pl_hostname'] == df['pl_hostname'].sample().values[0]].iloc[0][star_columns]
 series.where(pd.notnull(series), None)
+
 
 
 
@@ -102,6 +103,9 @@ df['pl_hostname'].nunique()
 stars_df = df.groupby('pl_hostname').first().reset_index()[star_columns]
 stars_df
 stars_df.describe().to_dict()
+
+stars_df.head()['pl_hostname'].sample()
+
 
 stars_df[stars_df.index == '11 Com']
 
@@ -118,3 +122,10 @@ df[['asd']]
 stars_df[stars_df['pl_hostname'] == '11 Com']
 stars_df[] == '11 Com'
 stars_df.index
+
+
+
+########## similar Planets
+df.sample()
+df.sample()[['pl_hostname', 'pl_rade', 'pl_ratror']]
+df['pl_rade'].hist()
