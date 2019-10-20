@@ -68,29 +68,15 @@ def get_star_info(star_name):
     return serialize(row.iloc[0]).to_dict()
 
 
-def priority(row):
-    pri = 0
-    if row['pl_rade_norm'] > 0:
-        pri += 1
-    if row['pl_orbsmax_norm'] > 0:
-        pri += 1
-    return pri
-
-
 # api
 
-def similar_planets(pl_rade, pl_orbsmax, prioritize, first=10):
+def similar_planets(pl_rade, pl_orbsmax, first=10):
     values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'],
                        pl_orbsmax / NORMALIZATION_FACTORS['pl_orbsmax']])
     vectors = df[['pl_rade_norm', 'pl_orbsmax_norm']]
     distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
-    if prioritize:
-        priorities = vectors.apply(lambda row: priority(row), axis=1)
-        top = vectors.assign(distance=distances, priority=priorities).query(
-            'distance > 0').sort_values(by=['priority', 'distance'], ascending=[False, True])
-    else:
-        top = vectors.assign(distance=distances).query(
-            'distance > 0').sort_values('distance')
+    top = vectors.assign(distance=distances).query(
+        'distance > 0').sort_values('distance')
     top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
     return serialize(top_allinfo.head(first)).to_dict(orient='records')
