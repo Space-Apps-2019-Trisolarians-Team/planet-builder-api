@@ -13,7 +13,8 @@ EFFECTIVE_TEMP_SUN = 5778
 NORMALIZATION_FACTORS = {
     'pl_rade': 6.71,
     'pl_masse': 1232.493,
-    'pl_distance': 0.163352
+    'pl_distance': 0.163352,
+    'pl_orbsmax': 0.5
 }
 
 df = pd.read_csv('app/exoplanets.csv')
@@ -55,7 +56,7 @@ def priority(row):
     return pri
 
 
-def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, first=10):
+def similar_planets(pl_rade, pl_masse, pl_orbsmax, prioritize, first=10):
     values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
                        NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
     vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
@@ -72,26 +73,12 @@ def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, first=10):
     return serialize(top_allinfo.head(first)).to_dict(orient='records')
 
 
-def similar_planet(pl_rade, pl_masse, pl_distance, prioritize):
-    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
-                       NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
-    vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
-    distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
-    if prioritize:
-        priorities = vectors.apply(lambda row: priority(row), axis=1)
-        top = vectors.assign(distance=distances, priority=priorities).query(
-            'distance > 0').sort_values(by=['priority', 'distance'], ascending=[False, True])
-    else:
-        top = vectors.assign(distance=distances).query(
-            'distance > 0').sort_values('distance')
-    top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
-        distance=top.distance)
-    return serialize(top_allinfo.iloc[0]).to_dict()
-
-
 def get_star_stats():
     stats = stars_df.describe()
-    return serialize(stats).to_dict()
+    max95 = stars_df.quantile(0.90)
+    max95.name = 'max95'
+
+    return serialize(stats.append(max95)).to_dict()
 
 
 def get_planet_stats(fields):
@@ -100,7 +87,10 @@ def get_planet_stats(fields):
         stats = df[fields].describe()
     else:
         stats = df.describe()
-    return serialize(stats).to_dict()
+
+    max95 = df.quantile(0.90)
+    max95.name = 'max95'
+    return serialize(stats.append(max95)).to_dict()
 
 
 def random_star():

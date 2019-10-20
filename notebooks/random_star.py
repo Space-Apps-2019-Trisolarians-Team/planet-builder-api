@@ -209,3 +209,56 @@ top = vectors.assign(distance=distances).query(
 top_allinfo = df.loc[top.index][PLANET_COLUMNS].assign(
     distance=top.distance)
 return serialize(top_allinfo.head(10)).to_dict(orient='records')
+
+
+
+
+
+
+
+import math
+SUN_RADIUS = 695510  # km
+EFFECTIVE_TEMP_SUN = 5778
+def habitable_zones(radius, effective_temp):
+    luminosity_quotient_r = math.sqrt((radius)**2 * (effective_temp/EFFECTIVE_TEMP_SUN)**4)
+    min_rad = 0.75 * luminosity_quotient_r
+    mean_rad = luminosity_quotient_r
+    max_rad = 1.77 * luminosity_quotient_r
+
+    return {'min': min_rad, 'center': mean_rad, 'max': max_rad}
+
+
+stars_df.head()
+def planet_in_hz(planet):
+    regions = habitable_zones(planet['st_rad'], planet['st_teff'])
+    mx = regions['max']
+    mn = regions['min']
+    return mn <= planet['pl_orbper'] <= mx
+
+
+df.apply(planet_in_hz, axis=1)
+df['in_hz']
+
+
+
+
+###########
+
+
+somedata = pd.read_json('https://exoplanet-api.herokuapp.com/exoplanet/')
+somedata['habitability'].sum()
+
+
+# df.apply(lambda g: g['pl_orbsmax']/(1+g['pl_orbeccen']),axis=1).notnull().sum()
+# df['pl_orbsmax'].notnull().sum()
+df['pl_orbsmax'].hist()
+without_outliers(df['pl_orbsmax'])
+
+df['pl_orbsmax'].loc[~is_outlier(df['pl_orbsmax'])].hist(bins=30)
+
+
+
+df.describe()
+max95 = df.quantile(0.95)
+max95.name = 'max95'
+df.describe().append(max95)

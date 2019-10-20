@@ -47,5 +47,5 @@ def read_similar_exoplanets(pl_rade: float = 1, pl_masse: float = 1, pl_distance
 
 
 @app.get("/similar_exoplanet")
-def read_similar_exoplanet(pl_rade: float = 1, pl_masse: float = 1, pl_distance: float = 1, prioritize: bool = False):
-    return planetapi.similar_planets(pl_rade, pl_masse, pl_distance, prioritize, 1)[0]
+def read_similar_exoplanet(pl_rade: float = 1, pl_masse: float = 1, pl_orbsmax: float = 1, prioritize: bool = False):
+    return planetapi.similar_planets(pl_rade, pl_masse, pl_orbsmax, prioritize, 1)[0]
