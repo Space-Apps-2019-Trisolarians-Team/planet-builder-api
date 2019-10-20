@@ -33,5 +33,5 @@ def read_random_star():
 
 
 @app.get("/similar_exoplanets")
-def read_similar_exoplanets(pl_rade: float = None, pl_masse: float = None, pl_distance: float = None):
-    return planetapi.similar_planets(**{'pl_rade': pl_rade, 'pl_masse': pl_masse, 'pl_distance': pl_distance})
+def read_similar_exoplanets(pl_rade: float = 1, pl_masse: float = 1, pl_distance: float = 1):
+    return planetapi.similar_planets(pl_rade, pl_masse, pl_distance)

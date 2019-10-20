@@ -187,3 +187,25 @@ top
 df.loc[top.index].assign(distance=top.distance)
 res = df.loc[top.index].assign(distance=top.distance).head(5)
 res.to_dict(orient='records')
+
+
+NORMALIZATION_FACTORS = {
+    'pl_rade': 6.71,
+    'pl_masse': 1232.493,
+    'pl_distance': 0.163352
+}
+pl_rade = 1
+pl_masse = 1
+pl_distance = 1
+values = np.array([pl_rade, pl_masse, pl_distance])
+
+df['pl_rade_norm'] = df.pl_rade / NORMALIZATION_FACTORS['pl_rade']
+df['pl_masse_norm'] = df.pl_masse / NORMALIZATION_FACTORS['pl_masse']
+df['pl_distance_norm'] = df.pl_distance / NORMALIZATION_FACTORS['pl_distance']
+vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
+distances = vectors.apply(lambda row: distance(row, values), axis=1)
+top = vectors.assign(distance=distances).query(
+    'distance > 0').sort_values('distance')
+top_allinfo = df.loc[top.index][PLANET_COLUMNS].assign(
+    distance=top.distance)
+return serialize(top_allinfo.head(10)).to_dict(orient='records')
