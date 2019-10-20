@@ -1,23 +1,27 @@
 import pandas as pd
 import math
 
-STAR_COLUMNS = ['st_spstr', 'st_age',
+STAR_COLUMNS = ['pl_hostname', 'st_spstr', 'st_age',
                 'st_mass', 'st_rad', 'st_teff', 'st_lum']
 PLANET_COLUMNS = ['pl_rade', 'pl_hostname', '']
 
 df = pd.read_csv('app/exoplanets.csv')
-stars_df = df.groupby('pl_hostname').first()[STAR_COLUMNS]
+stars_df = df.groupby('pl_hostname').first().reset_index()[STAR_COLUMNS]
+
 SUN_RADIUS = 695510  # km
 EFFECTIVE_TEMP_SUN = 5778
 
 
+def serialize(df):
+    return df.where(pd.notnull(df), None).to_dict()
+
+
 def get_star_info(star_name):
-    rows = df[df['pl_hostname'] == star_name]
-    if len(rows) == 0:
+    row = stars_df[stars_df['pl_hostname'] == star_name]
+    print(row)
+    if len(row) == 0:
         return None
-    series = rows.iloc[0][STAR_COLUMNS]
-    series = series.where(pd.notnull(series), None)
-    return series.to_dict()
+    return serialize(row)
 
 
 def similar_planets():
@@ -26,8 +30,7 @@ def similar_planets():
 
 def get_star_stats():
     stats = stars_df.describe()
-    stats = stats.where(pd.notnull(stats), None)
-    return stats.to_dict()
+    return serialize(stats)
 
 
 def get_planet_stats(fields):
@@ -36,13 +39,11 @@ def get_planet_stats(fields):
         stats = df[fields].describe()
     else:
         stats = df.describe()
-    stats = stats.where(pd.notnull(stats), None)
-    return stats.to_dict()
+    return serialize(stats)
 
 
 def random_star():
     star_name = df['pl_hostname'].sample().values[0]
-    print(star_name)
     return get_star_info(star_name)
 
 
