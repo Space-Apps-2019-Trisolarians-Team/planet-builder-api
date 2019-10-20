@@ -55,7 +55,7 @@ def priority(row):
     return pri
 
 
-def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, top=10):
+def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, first=10):
     values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
                        NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
     vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
@@ -69,7 +69,7 @@ def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, top=10):
             'distance > 0').sort_values('distance')
     top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
-    return serialize(top_allinfo.head(top)).to_dict(orient='records')
+    return serialize(top_allinfo.head(first)).to_dict(orient='records')
 
 
 def similar_planet(pl_rade, pl_masse, pl_distance, prioritize):
