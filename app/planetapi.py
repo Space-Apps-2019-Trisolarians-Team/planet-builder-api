@@ -60,7 +60,7 @@ def similar_planets(pl_rade, pl_masse, pl_distance, prioritize):
     else:
         top = vectors.assign(distance=distances).query(
             'distance > 0').sort_values('distance')
-    top_allinfo = df.loc[top.index][PLANET_COLUMNS].assign(
+    top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
     return serialize(top_allinfo.head(10)).to_dict(orient='records')
 
@@ -75,7 +75,7 @@ def similar_planet(pl_rade, pl_masse, pl_distance, prioritize):
     else:
         top = vectors.assign(distance=distances).query(
             'distance > 0').sort_values('distance')
-    top_allinfo = df.loc[top.index][PLANET_COLUMNS].assign(
+    top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
     return serialize(top_allinfo.iloc[0]).to_dict()
 
