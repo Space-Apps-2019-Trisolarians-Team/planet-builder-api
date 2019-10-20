@@ -263,3 +263,7 @@ df.describe()
 max95 = df.quantile(0.95)
 max95.name = 'max95'
 df.describe().append(max95)
+
+
+###
+df.pl_orbsmax.notnull().sum()
