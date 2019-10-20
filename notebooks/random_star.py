@@ -127,5 +127,63 @@ stars_df.index
 
 ########## similar Planets
 df.sample()
-df.sample()[['pl_hostname', 'pl_rade', 'pl_ratror']]
-df['pl_rade'].hist()
+df.sample()[['pl_hostname', 'pl_rade', 'pl_ratror', 'pl_masse']]
+df['pl_rade'].hist(bins=20)
+
+import numpy as np
+
+def is_outlier(points, thresh=3.5):
+    if len(points.shape) == 1:
+        points = points[:,None]
+    median = np.nanmedian(points, axis=0)
+    diff = np.sum((points - median)**2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.nanmedian(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    return modified_z_score > thresh
+
+def normalize(points, thresh=3.5):
+    without_outliers = points.loc[~is_outlier(points, thresh)]
+    # min = without_outliers.min()
+    max = without_outliers.max()
+    print(max)
+    return without_outliers/max
+
+normalize(df['pl_rade']).hist(bins=50)
+normalize(df['pl_masse']).hist(bins=50)
+normalize(df['pl_distance']).hist(bins=50)
+
+
+df[~is_outlier(df['pl_rade'], thresh=3.50)]['pl_rade'].hist(bins=20)
+(df[~is_outlier(df['pl_rade'], thresh=3.5)]['pl_rade']/ 7 ).hist(bins=20)
+
+
+
+df[~is_outlier(df['pl_masse'], thresh=3.5)].query('pl_masse > 0')['pl_masse'].hist(bins=200)
+(df[~is_outlier(df['pl_masse'], thresh=3.5)].query('pl_masse > 0')['pl_masse'] / 1200).hist(bins=200)
+
+
+df['pl_distance'] = df['pl_ratdor']*df['st_rad']*695510/149597870
+df[~is_outlier(df['pl_distance'], thresh=3.5)]['pl_distance'].hist(bins=200)
+(df[~is_outlier(df['pl_distance'], thresh=3.5)]['pl_distance'] / 0.16).hist(bins=200)
+
+
+def distance(v1, v2):
+    return np.sqrt(np.nansum(v1 * v2))
+
+kwargs = {'pl_distance': 0.04, 'pl_masse': 1, 'pl_rade': 3}
+keys = kwargs.keys()
+values = np.array(list(kwargs.values()))
+vectors = df[keys]
+vectors.values
+np.sqrt(vectors.values.dot(values))
+
+distances = vectors.apply(lambda row: distance(row, values), axis=1)
+vectors.assign(distance=distances)
+top = vectors.assign(distance=distances).query('distance > 0').sort_values('distance')
+top
+df.loc[top.index].assign(distance=top.distance)
+res = df.loc[top.index].assign(distance=top.distance).head(5)
+res.to_dict(orient='records')
