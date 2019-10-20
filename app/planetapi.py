@@ -6,7 +6,7 @@ STAR_COLUMNS = ['pl_hostname', 'st_spstr', 'st_age',
                 'st_mass', 'st_rad', 'st_teff', 'st_lum']
 PLANET_COLUMNS = ['pl_name', 'pl_rade',
                   'pl_ratror', 'pl_masse', 'pl_distance',
-                  'pl_disc', 'pl_status',  'pl_pelink', 'pl_edelink'] 
+                  'pl_disc', 'pl_status',  'pl_pelink', 'pl_edelink']
 
 SUN_RADIUS = 695510  # km
 EFFECTIVE_TEMP_SUN = 5778
@@ -24,11 +24,14 @@ df['pl_distance_norm'] = df.pl_distance / NORMALIZATION_FACTORS['pl_distance']
 
 stars_df = df.groupby('pl_hostname').first().reset_index()[STAR_COLUMNS]
 
+
 def distanceL1(v1, v2):
     return np.nansum(abs(v1 - v2))
 
+
 def distanceL2(v1, v2):
     return np.sqrt(np.nansum((v1 - v2)**2))
+
 
 def serialize(df):
     return df.where(pd.notnull(df), None)
@@ -51,8 +54,10 @@ def priority(row):
         pri += 1
     return pri
 
-def similar_planets(pl_rade, pl_masse, pl_distance, prioritize):
-    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse / NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
+
+def similar_planets(pl_rade, pl_masse, pl_distance, prioritize, top=10):
+    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
+                       NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
     vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
     distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
     if prioritize:
@@ -64,10 +69,12 @@ def similar_planets(pl_rade, pl_masse, pl_distance, prioritize):
             'distance > 0').sort_values('distance')
     top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
-    return serialize(top_allinfo.head(10)).to_dict(orient='records')
+    return serialize(top_allinfo.head(top)).to_dict(orient='records')
+
 
 def similar_planet(pl_rade, pl_masse, pl_distance, prioritize):
-    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse / NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
+    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
+                       NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
     vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
     distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
     if prioritize:
@@ -80,6 +87,7 @@ def similar_planet(pl_rade, pl_masse, pl_distance, prioritize):
     top_allinfo = df.loc[top.index][STAR_COLUMNS + PLANET_COLUMNS].assign(
         distance=top.distance)
     return serialize(top_allinfo.iloc[0]).to_dict()
+
 
 def get_star_stats():
     stats = stars_df.describe()

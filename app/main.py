@@ -12,6 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -41,9 +42,10 @@ def read_random_star():
 
 
 @app.get("/similar_exoplanets")
-def read_similar_exoplanets(pl_rade: float = 1, pl_masse: float = 1, pl_distance: float = 1, prioritize: bool = False):
-    return planetapi.similar_planets(pl_rade, pl_masse, pl_distance, prioritize)
+def read_similar_exoplanets(pl_rade: float = 1, pl_masse: float = 1, pl_distance: float = 1, prioritize: bool = False, first=10):
+    return planetapi.similar_planets(pl_rade, pl_masse, pl_distance, prioritize, first=first)
+
 
 @app.get("/similar_exoplanet")
 def read_similar_exoplanet(pl_rade: float = 1, pl_masse: float = 1, pl_distance: float = 1, prioritize: bool = False):
-    return planetapi.similar_planet(pl_rade, pl_masse, pl_distance, prioritize)
+    return planetapi.similar_planets(pl_rade, pl_masse, pl_distance, prioritize, 1)[0]
