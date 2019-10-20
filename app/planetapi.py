@@ -6,7 +6,7 @@ STAR_COLUMNS = ['pl_hostname', 'st_spstr', 'st_age',
                 'st_mass', 'st_rad', 'st_teff', 'st_lum']
 PLANET_COLUMNS = ['pl_name', 'pl_rade',
                   'pl_ratror', 'pl_masse', 'pl_distance',
-                  'pl_disc', 'pl_status',  'pl_pelink', 'pl_edelink']
+                  'pl_disc', 'pl_status',  'pl_pelink', 'pl_edelink', 'pl_orbsmax']
 
 SUN_RADIUS = 695510  # km
 EFFECTIVE_TEMP_SUN = 5778
@@ -22,6 +22,7 @@ df['pl_distance'] = df['pl_ratdor']*df['st_rad']*SUN_RADIUS/149597870
 df['pl_rade_norm'] = df.pl_rade / NORMALIZATION_FACTORS['pl_rade']
 df['pl_masse_norm'] = df.pl_masse / NORMALIZATION_FACTORS['pl_masse']
 df['pl_distance_norm'] = df.pl_distance / NORMALIZATION_FACTORS['pl_distance']
+df['pl_orbsmax_norm'] = df.pl_orbsmax / NORMALIZATION_FACTORS['pl_orbsmax']
 
 stars_df = df.groupby('pl_hostname').first().reset_index()[STAR_COLUMNS]
 
@@ -51,15 +52,15 @@ def priority(row):
         pri += 1
     if row['pl_masse_norm'] > 0:
         pri += 1
-    if row['pl_distance_norm'] > 0:
+    if row['pl_orbsmax_norm'] > 0:
         pri += 1
     return pri
 
 
 def similar_planets(pl_rade, pl_masse, pl_orbsmax, prioritize, first=10):
     values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse /
-                       NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
-    vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
+                       NORMALIZATION_FACTORS['pl_masse'], pl_orbsmax / NORMALIZATION_FACTORS['pl_orbsmax']])
+    vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_orbsmax_norm']]
     distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
     if prioritize:
         priorities = vectors.apply(lambda row: priority(row), axis=1)
