@@ -15,17 +15,18 @@ NORMALIZATION_FACTORS = {
 }
 
 df = pd.read_csv('app/exoplanets.csv')
-df['pl_distance'] = df['pl_ratdor']*df['st_rad']*695510/149597870
+df['pl_distance'] = df['pl_ratdor']*df['st_rad']*SUN_RADIUS/149597870
 df['pl_rade_norm'] = df.pl_rade / NORMALIZATION_FACTORS['pl_rade']
 df['pl_masse_norm'] = df.pl_masse / NORMALIZATION_FACTORS['pl_masse']
 df['pl_distance_norm'] = df.pl_distance / NORMALIZATION_FACTORS['pl_distance']
 
 stars_df = df.groupby('pl_hostname').first().reset_index()[STAR_COLUMNS]
 
+def distanceL1(v1, v2):
+    return np.nansum(abs(v1 - v2))
 
-def distance(v1, v2):
-    return np.sqrt(np.nansum(v1 * v2))
-
+def distanceL2(v1, v2):
+    return np.sqrt(np.nansum((v1 - v2)**2))
 
 def serialize(df):
     return df.where(pd.notnull(df), None)
@@ -38,14 +39,30 @@ def get_star_info(star_name):
     return serialize(row.iloc[0]).to_dict()
 
 
-def similar_planets(pl_rade, pl_masse, pl_distance):
-    values = np.array([pl_rade, pl_masse, pl_distance])
+def priority(row):
+    pri = 0
+    if row['pl_rade_norm'] > 0:
+        pri += 1
+    if row['pl_masse_norm'] > 0:
+        pri += 1
+    if row['pl_distance_norm'] > 0:
+        pri += 1
+    return pri
+
+def similar_planets(pl_rade, pl_masse, pl_distance, prioritize=False):
+    values = np.array([pl_rade / NORMALIZATION_FACTORS['pl_rade'], pl_masse / NORMALIZATION_FACTORS['pl_masse'], pl_distance / NORMALIZATION_FACTORS['pl_distance']])
     vectors = df[['pl_rade_norm', 'pl_masse_norm', 'pl_distance_norm']]
-    distances = vectors.apply(lambda row: distance(row, values), axis=1)
-    top = vectors.assign(distance=distances).query(
-        'distance > 0').sort_values('distance')
+    distances = vectors.apply(lambda row: distanceL2(row, values), axis=1)
+    if prioritize:
+        priorities = vectors.apply(lambda row: priority(row), axis=1)
+        top = vectors.assign(distance=distances, priority=priorities).query(
+            'distance > 0').sort_values(by=['priority', 'distance'], ascending=[False, True])
+    else:
+        top = vectors.assign(distance=distances).query(
+            'distance > 0').sort_values('distance')
     top_allinfo = df.loc[top.index][PLANET_COLUMNS].assign(
         distance=top.distance)
+    print(top_allinfo.head())
     return serialize(top_allinfo.head(10)).to_dict(orient='records')
 
 
